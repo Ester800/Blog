@@ -1,7 +1,9 @@
 const express = require('express');  // import express
 const morgan = require('morgan');  // import middleware morgan
 const mongoose = require('mongoose');
-const Blog = require('./models/blog');
+
+const { render } = require('ejs');
+const blogRoutes = require('./routes/blogRoutes');
 
 const app = express();  // express app
 
@@ -29,6 +31,7 @@ app.set('view engine', 'ejs'); // registers the view engine
 
 // middleware and static files
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 // mongoose and mongo sandbox routes 
@@ -98,21 +101,7 @@ app.get('/about', (req, res) => {  // this function renders the about page!
 //     res.redirect('/about');
 // });
 
-app.get('/blogs', (req, res) => {
-    Blog.find().sort({ createdAt: -1 })
-        .then((result) => {
-            res.render('index', { title: 'All blogs', blogs: result })
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
-
-
-// loads createBlogs page
-app.get('/blogs/create', (req, res) => {
-    res.render('create', { title: 'Create a new blog' });
-});
+app.use('/blogs', blogRoutes);
 
 // 404 page
 app.use((req, res) => {
